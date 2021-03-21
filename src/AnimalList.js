@@ -22,6 +22,9 @@ const useStyles = makeStyles(theme => ({
         paddingLeft: '50px',
         paddingRight: '50px'
     },
+    cardItem: {
+        cursor: 'pointer',
+    },
     cardMedia: {
         margin: 'auto',
     },
@@ -53,24 +56,25 @@ const AnimalList = (props) => {
     const [filter, setFilter] = useState("");
 
     const hanldeSearchChange = (e) => {
-        setFilter(e.target.value);
+        setFilter(e.target.value.toLowerCase());
     };
 
     //api request
     useEffect(() => {
         axios 
-          .get(`https://pokeapi.co/api/v2/pokemon?limit=807`)
+          .get(`https://acnhapi.com/v1a/villagers`)
           .then(function (response) {
               const { data } = response;
               const { results } = data;
               const newAnimalData = {};
-              results.forEach((animal, index) => {
+              
+              data.forEach((animal, index) => {
                   newAnimalData[index + 1] = {
                       id: index + 1,
-                      name: animal.name,
-                      sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
+                      name: animal.name["name-USen"],
+                      sprite: `https://acnhapi.com/v1/icons/villagers/${
                         index + 1
-                    }.png`,
+                    }`,
                   };
               });
               setAnimalData(newAnimalData);
@@ -82,14 +86,14 @@ const AnimalList = (props) => {
 
         return(
         <Grid item xs={12} sm={4} key={animalId}>
-            <Card onClick = {() => history.push(`/${animalId}`)}>
+            <Card className={classes.cardItem} onClick = {() => history.push(`/${animalId}`)}>
                 <CardMedia 
                 className={classes.cardMedia}
                 image={sprite}
                 style={{ width: "130px", height: "130px" }}
                 />
                 <CardContent className={classes.cardContent}>
-                    <Typography>{`${id}. ${toFirstCharUppercase(name)}`}</Typography>
+                    <Typography>{`${toFirstCharUppercase(name)}`}</Typography>
                 </CardContent>
             </Card>
         </Grid>
@@ -111,10 +115,11 @@ const AnimalList = (props) => {
             </div>
         </Toolbar>        
         </AppBar>
+        
         {animalData ? (
         <Grid container spacing={2} className={classes.listContainer}>
            {Object.keys(animalData).map(animalId =>
-             animalData[animalId].name.includes(filter) &&
+             animalData[animalId].name.toLowerCase().includes(filter) &&
              getAnimalCard(animalId)
             )}
         </Grid>
