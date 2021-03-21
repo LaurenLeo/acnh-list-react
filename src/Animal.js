@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
-import mockData from "./mockData";
-import { Typography } from "@material-ui/core";
+import React, { useState, useEffect } from 'react';
+import { Typography, CircularProgress, Button} from "@material-ui/core";
 import { toFirstCharUppercase } from "./constants";
+import axios from "axios";
 
 const Animal = (props) => {
-    const { match } = props;
+    const { history, match } = props;
     const { params } = match;
     const { animalId } = params;
-    const [animal, setAnimal] = useState(mockData[`${animalId}`]);
+    const [animal, setAnimal] = useState(undefined);
+
+    useEffect(() => {
+        axios
+          .get(`https://pokeapi.co/api/v2/pokemon/${animalId}/`)
+          .then(function (response) {
+            const { data } = response;
+            setAnimal(data);
+          })
+          .catch(function (error) {
+            setAnimal(false);
+          });
+      }, [animalId]);
+    
 
     const generateAnimalJSX = () => {
         const { name, id, species, height, weight, types, sprites } = animal;
@@ -32,8 +45,18 @@ const Animal = (props) => {
             </>
         )
     }
-    return <>{generateAnimalJSX()}</>;
+    return (<>
+    {animal === undefined && <CircularProgress />}
+    {animal !== undefined && animal && generateAnimalJSX()}
+    {animal === false && <Typography>Animal not found</Typography>}
     
-}
+    {animal !== undefined && (
+        <Button variant="contained" onClick={() => history.push("/")}>
+            back to animal list
+        </Button>
+    )}
+    </>
+    );
+};
 
 export default Animal;
